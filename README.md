@@ -5,3 +5,4 @@ BicyclePov
 测试一下windows
 ===
 再修改一下
+命令行才是王道

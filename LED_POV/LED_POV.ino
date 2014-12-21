@@ -55,7 +55,7 @@ const int col6 = 11; // the number of the col pin 15
 const int col7 = 12; // the number of the col pin 14
 const int col8 = 13; // the number of the col pin 13
 
-void displayNum(byte rowNum,int colNum)
+void displayNum(byte rowNum)
 {
   int j;
   byte temp = rowNum;
@@ -67,39 +67,6 @@ void displayNum(byte rowNum,int colNum)
   digitalWrite(row6, LOW);
   digitalWrite(row7, LOW);
   digitalWrite(row8, LOW);
-  for(j=col1;j<=col8;j++)
-  {
-    digitalWrite(j, HIGH); 
-  }
-  switch(colNum)
-  {
-  case 1: 
-    digitalWrite(col1, LOW); 
-    break;
-  case 2: 
-    digitalWrite(col2, LOW); 
-    break;
-  case 3: 
-    digitalWrite(col3, LOW); 
-    break;
-  case 4: 
-    digitalWrite(col4, LOW); 
-    break;
-  case 5: 
-    digitalWrite(col5, LOW); 
-    break;
-  case 6: 
-    digitalWrite(col6, LOW); 
-    break;
-  case 7: 
-    digitalWrite(col7, LOW); 
-    break;
-  case 8: 
-    digitalWrite(col8, LOW); 
-    break;
-  default: 
-    break;
-  }
   for(j = 1 ;j < 9; j++)
   {
     temp = (0x80)&(temp) ;
@@ -156,16 +123,13 @@ void loop(){
   int t1;
   int l;
   int arrage;
-  for(arrage=1;arrage<9;arrage++)
+  for(arrage=1;arrage<2;arrage++)
   {
-//    for(l=0;l<2048;l++)
-//    {
       for(t1=0;t1<8;t1++)
       {
-        displayNum(data_ascii[arrage][t1],(t1+1));
+        displayNum(data_ascii[arrage][t1]);
         delayMicroseconds( 5000 );
       }
-    //}
   }
 }
 

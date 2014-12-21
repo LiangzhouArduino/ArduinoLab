@@ -37,6 +37,84 @@ byte data_ascii[][display_array_size] = {
   data_ascii_H,
   data_ascii_I,
 };
+
+int music_rhythm[25][2] = {
+  {
+    392,250  }
+  ,
+  {
+    392,250  }
+  ,
+  {
+    440,500  }
+  ,
+  {
+    392,500  }
+  ,
+  {
+    523,500  }
+  ,
+  {
+    494,1000  }
+  ,
+  {
+    392,250  }
+  ,
+  {
+    392,250  }
+  ,
+  {
+    440,500  }
+  ,
+  {
+    392,500  }
+  ,
+  {
+    587,500  }
+  ,
+  {
+    523,1000  }
+  ,
+  {
+    392,250  }
+  ,
+  {
+    392,250  }
+  ,
+  {
+    784,500  }
+  ,
+  {
+    659,500  }
+  ,
+  {
+    523,500  }
+  ,
+  {
+    494,500  }
+  ,
+  {
+    440,500  }
+  ,
+  {
+    699,250  }
+  ,
+  {
+    699,250  }
+  ,
+  {
+    659,500  }
+  ,
+  {
+    523,500  }
+  ,
+  {
+    587,500  }
+  ,
+  {
+    523,1000  }
+};
+
 //the pin to control ROW
 const int row1 = 2; // the number of the row pin 24
 const int row2 = 3; // the number of the row pin 23
@@ -109,24 +187,37 @@ void POV() {
   charCounter = counter>>3;
   displayNum(data_ascii[counter>>3][counter&7]);
   if(charCounter>1)counter=0;
- // Serial.println(counter);
+  // Serial.println(counter);
   counter++;
 }
 
 void Music(){
   //Serial.println("music");
+  static int counter=0;
+  static int rhythm=0;
+  if(rhythm == 0){
+    rhythm = music_rhythm[counter][1];
+  }
+  tone(8,music_rhythm[counter][0],280);
+  rhythm -= 250;
+  if(rhythm == 0){
+    counter++;
+  }
+  if(counter>=25){
+    counter=0;
+  }
 }
 
 
 void setup() {
-//  Serial.begin(9600);
-//
-//  // welcome message
-//  Serial.println("SimpleTimer Example");
+  //  Serial.begin(9600);
+  //
+  //  // welcome message
+  //  Serial.println("SimpleTimer Example");
 
   // timed actions setup
   timer.setInterval(30, POV);
-  timer.setInterval(1000, Music);
+  timer.setInterval(250, Music);
 
   int i = 0 ;
   for(i=2;i<18;i++)
@@ -143,4 +234,6 @@ void loop() {
   // this is where the "polling" occurs
   timer.run();
 }
+
+
 

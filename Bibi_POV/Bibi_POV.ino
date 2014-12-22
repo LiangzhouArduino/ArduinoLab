@@ -57,9 +57,10 @@ void displayNum(unsigned rowNum)
 {
   int i;
   unsigned mask = 0x8000;
+  //Serial.println(rowNum);
   for(i=0;i<16;i++)
   {
-    if(mask & rowNum > 0){
+    if((mask & rowNum) != 0){
       digitalWrite(pinRow[i], HIGH);
     }else{
       digitalWrite(pinRow[i], LOW);
@@ -94,24 +95,18 @@ void Music(){
   if(counter >= rhythmCount){
     counter=0;
   }
-  Serial.println(counter);
 }
 
-
 void setup() {
-  Serial.begin(9600);
+  //Serial.begin(9600);
   //
   //  // welcome message
   // timed actions setup
   charCount = sizeof(charList) / sizeof(charList[0]);
   rhythmCount = sizeof(music_rhythm) / sizeof(music_rhythm[0]);
-//  Serial.print("charCount:");
-//  Serial.println(charCount);
-//  Serial.print("rhythmCount:");
-//  Serial.println(rhythmCount);
   
   timer.setInterval(10, POV);
-  timer.setInterval(250, Music);
+  timer.setInterval(260, Music);
 
   int i = 0 ;
   for(i=0;i<16;i++)

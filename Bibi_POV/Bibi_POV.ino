@@ -1,22 +1,14 @@
 #include <SimpleTimer.h>
 
+#define MUSIC_ELEMENT 25
+
+#define PIN_COUNT  16
 #define display_array_size 8
 // ascii 8x8 dot font
+// (\w{2})H.{1,3}(\w{2})H,?     0x\1\2,
 
 #define data_ascii_A 0x02,0x0C,0x18,0x68,0x68,0x18,0x0C,0x02 /*"A",0*/
-/** 
- **"A"
- * #define A  { //
- * {0, 0, 0, 0, 0, 0, 1, 0}, //0x02
- * {0, 0, 0, 0, 1, 1, 0, 0}, //0x0C
- * {0, 0, 0, 1, 1, 0, 0, 0}, //0x18
- * {0, 1, 1, 0, 1, 0, 0, 0}, //0x68
- * {0, 1, 1, 0, 1, 0, 0, 0}, //0x68
- * {0, 0, 0, 1, 1, 0, 0, 0}, //0x18
- * {0, 0, 0, 0, 1, 1, 0, 0}, //0x0C
- * {0, 0, 0, 0, 0, 0, 1, 0}  //0x02
- * }
- **/
+
 #define data_ascii_B 0x00,0x7E,0x52,0x52,0x52,0x52,0x2C,0x00 /*"B",1*/
 #define data_ascii_C 0x00,0x3C,0x66,0x42,0x42,0x42,0x2C,0x00 /*"C",2*/
 #define data_ascii_D 0x00,0x7E,0x42,0x42,0x42,0x66,0x3C,0x00 /*"D",3*/
@@ -25,20 +17,20 @@
 #define data_ascii_G 0x00,0x3C,0x66,0x42,0x42,0x52,0x16,0x1E /*"G",6*/
 #define data_ascii_H 0x00,0x7E,0x10,0x10,0x10,0x10,0x7E,0x00 /*"H",7*/
 #define data_ascii_I 0x00,0x00,0x00,0x7E,0x00,0x00,0x00,0x00 /*"I",8*/
+
 // display array
-byte data_ascii[][display_array_size] = {
-  data_ascii_A, 
-  data_ascii_B,
-  data_ascii_C,
-  data_ascii_D,
-  data_ascii_E,
-  data_ascii_F,
-  data_ascii_G,
-  data_ascii_H,
-  data_ascii_I,
+unsigned data_ascii[][display_array_size] = {
+  {0x1008,0x1FFC,0x2808,0x2FF8, 0x6888,0xA8A8,0x2BF8,0x2AA8, 0x2AA8,0x2AA8,0x2AA8,0x2AA8, 0x2AEA,0x288A,0x3086,0x2080},//pei
+  {0x1008,0x1FFC,0x2808,0x2FF8, 0x6888,0xA8A8,0x2BF8,0x2AA8, 0x2AA8,0x2AA8,0x2AA8,0x2AA8, 0x2AEA,0x288A,0x3086,0x2080},
+  {0x0000,0x0000,0x0000,0x0000, 0x0000,0x0000,0x0000,0x0000, 0x0000,0x0000,0x1800,0x1800, 0x1000,0x2000,0x0000,0x0000},
+  {0x0100,0x1100,0x1100,0x1108, 0x3FFC,0x2100,0x4100,0x4100, 0x8110,0x3FF8,0x0100,0x0100, 0x0100,0x0104,0xFFFE,0x0000},//sheng
+  {0x0010,0x1FF8,0x1010,0x1010, 0x1010,0x1010,0x1010,0x1FF0, 0x1010,0x1010,0x1010,0x1010, 0x1010,0x1FF0,0x1010,0x0000}, // ri
+  {0x1080,0x1080,0x1080,0x1088, 0x5BFC,0x5488,0x5088,0x9088, 0x1088,0x1FFE,0x1080,0x1140, 0x1120,0x1210,0x140E,0x1804},//kuai
+  {0x0020,0x00F0,0x1F00,0x1000, 0x1100,0x1100,0x2104,0x7FFE, 0x0100,0x0100,0x0920,0x0910, 0x1108,0x210C,0x4504,0x0200},//le
+  {0x0000,0x0180,0x03C0,0x03C0, 0x03C0,0x0180,0x0180,0x0180, 0x0180,0x0180,0x0000,0x0000, 0x0180,0x0180,0x0000,0x0000}
 };
 
-int music_rhythm[25][2] = {
+int music_rhythm[MUSIC_ELEMENT][2] = {
   { 392,250  } ,
   { 392,250  } ,
   { 440,500  } ,
@@ -67,79 +59,52 @@ int music_rhythm[25][2] = {
 };
 
 //the pin to control ROW
-const int row1 = 2; // the number of the row pin 24
-const int row2 = 3; // the number of the row pin 23
-const int row3 = 4; // the number of the row pin 22
-const int row4 = 5; // the number of the row pin 21
-const int row5 = 17; // the number of the row pin 4
-const int row6 = 16; // the number of the row pin 3
-const int row7 = 15; // the number of the row pin 2
-const int row8 = 14; // the number of the row pin 1
+int pinRow[PIN_COUNT] = {
+  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
+};
+
+const int pinMusic = 18;
 
 SimpleTimer timer;
 
-void displayNum(byte rowNum)
+void displayNum(unsigned rowNum)
 {
-  int j;
-  byte temp = rowNum;
-  for(j=row1;j<=row4;j++)
+  int i;
+  unsigned mask = 0x8000;
+  for(i=0;i<16;i++)
   {
-    digitalWrite(j, LOW);
-  }
-  digitalWrite(row5, LOW);
-  digitalWrite(row6, LOW);
-  digitalWrite(row7, LOW);
-  digitalWrite(row8, LOW);
-  for(j = 1 ;j < 9; j++)
-  {
-    temp = (0x80)&(temp) ;
-    if(temp==0)
-    {
-      temp = rowNum<<j;
-      continue;
+    if(mask & rowNum > 0){
+      digitalWrite(pinRow[i], HIGH);
+    }else{
+      digitalWrite(pinRow[i], LOW);
     }
-    switch(j)
-    {
-    case 1: 
-      digitalWrite(row1, HIGH); 
-      break;
-    case 2: 
-      digitalWrite(row2, HIGH); 
-      break;
-    case 3: 
-      digitalWrite(row3, HIGH); 
-      break;
-    case 4: 
-      digitalWrite(row4, HIGH); 
-      break;
-    case 5: 
-      digitalWrite(row5, HIGH); 
-      break;
-    case 6: 
-      digitalWrite(row6, HIGH); 
-      break;
-    case 7: 
-      digitalWrite(row7, HIGH); 
-      break;
-    case 8: 
-      digitalWrite(row8, HIGH); 
-      break;
-    default: 
-      break;
-    }
-    temp = rowNum<<j;
+    mask = mask>>1;
   }
 }
 
 // function to be called repeatedly
 void POV() {
-  static unsigned counter=0;
-  unsigned charCounter;
-  charCounter = counter>>3;
-  displayNum(data_ascii[counter>>3][counter&7]);
-  if(charCounter>1)counter=0;
-  // Serial.println(counter);
-  counter++;
+  static unsigned counter;
+  //unsigned charCounter;
+  //charCounter = counter>>3;
+  //displayNum(data_ascii[counter>>3][counter&7]);
+  //if(charCounter>1)counter=0;
+   Serial.println(counter);
+  //counter++;
+  int i = 0 ;
+  if(counter==0){
+    for(i=0;i<16;i++)
+    {
+      digitalWrite(pinRow[i], HIGH);
+    }
+    counter=1;
+  } else{
+    for(i=0;i<16;i++)
+    {
+      digitalWrite(pinRow[i], LOW);
+    }
+    counter = 0;
+  }
 }
 
 void Music(){
@@ -148,37 +113,35 @@ void Music(){
   static int rhythm=0;
   if(rhythm == 0){
     rhythm = music_rhythm[counter][1];
-    tone(8,music_rhythm[counter][0],rhythm);
+    tone(pinMusic,music_rhythm[counter][0],rhythm);
   }
   rhythm -= 250;
   if(rhythm == 0){
     counter++;
   }
-  if(counter>=25){
+  if(counter>=MUSIC_ELEMENT){
     counter=0;
   }
 }
 
 
 void setup() {
-  //  Serial.begin(9600);
+    Serial.begin(9600);
   //
   //  // welcome message
   //  Serial.println("SimpleTimer Example");
 
   // timed actions setup
-  timer.setInterval(30, POV);
+  timer.setInterval(1000, POV);
   timer.setInterval(250, Music);
 
   int i = 0 ;
-  for(i=2;i<18;i++)
+  for(i=0;i<16;i++)
   {
-    pinMode(i, OUTPUT);
+    pinMode(pinRow[i], OUTPUT);
+    digitalWrite(pinRow[i], LOW);
   }
 
-  for(i=2;i<18;i++) {
-    digitalWrite(i, LOW);
-  }
 }
 
 void loop() {

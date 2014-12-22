@@ -148,8 +148,8 @@ void Music(){
   static int rhythm=0;
   if(rhythm == 0){
     rhythm = music_rhythm[counter][1];
+    tone(8,music_rhythm[counter][0],rhythm);
   }
-  tone(8,music_rhythm[counter][0],280);
   rhythm -= 250;
   if(rhythm == 0){
     counter++;

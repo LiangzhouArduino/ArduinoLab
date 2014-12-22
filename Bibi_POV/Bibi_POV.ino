@@ -3,7 +3,7 @@
 #define MUSIC_ELEMENT 25
 
 #define PIN_COUNT  16
-#define display_array_size 8
+#define display_array_size 16
 // ascii 8x8 dot font
 // (\w{2})H.{1,3}(\w{2})H,?     0x\1\2,
 
@@ -132,7 +132,7 @@ void setup() {
   //  Serial.println("SimpleTimer Example");
 
   // timed actions setup
-  timer.setInterval(1000, POV);
+  timer.setInterval(10, POV);
   timer.setInterval(250, Music);
 
   int i = 0 ;

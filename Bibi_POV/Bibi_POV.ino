@@ -1,25 +1,16 @@
 #include <SimpleTimer.h>
 
-#define MUSIC_ELEMENT 25
-
 #define PIN_COUNT  16
-#define display_array_size 16
-// ascii 8x8 dot font
+
+//define pin
+int pinRow[PIN_COUNT] = {
+  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
+};
+const int pinMusic = 18;
+
 // (\w{2})H.{1,3}(\w{2})H,?     0x\1\2,
-
-#define data_ascii_A 0x02,0x0C,0x18,0x68,0x68,0x18,0x0C,0x02 /*"A",0*/
-
-#define data_ascii_B 0x00,0x7E,0x52,0x52,0x52,0x52,0x2C,0x00 /*"B",1*/
-#define data_ascii_C 0x00,0x3C,0x66,0x42,0x42,0x42,0x2C,0x00 /*"C",2*/
-#define data_ascii_D 0x00,0x7E,0x42,0x42,0x42,0x66,0x3C,0x00 /*"D",3*/
-#define data_ascii_E 0x00,0x7E,0x52,0x52,0x52,0x52,0x52,0x42 /*"E",4*/
-#define data_ascii_F 0x00,0x7E,0x50,0x50,0x50,0x50,0x50,0x40 /*"F",5*/
-#define data_ascii_G 0x00,0x3C,0x66,0x42,0x42,0x52,0x16,0x1E /*"G",6*/
-#define data_ascii_H 0x00,0x7E,0x10,0x10,0x10,0x10,0x7E,0x00 /*"H",7*/
-#define data_ascii_I 0x00,0x00,0x00,0x7E,0x00,0x00,0x00,0x00 /*"I",8*/
-
 // display array
-unsigned data_ascii[][display_array_size] = {
+unsigned charList[][PIN_COUNT] = {
   {0x1008,0x1FFC,0x2808,0x2FF8, 0x6888,0xA8A8,0x2BF8,0x2AA8, 0x2AA8,0x2AA8,0x2AA8,0x2AA8, 0x2AEA,0x288A,0x3086,0x2080},//pei
   {0x1008,0x1FFC,0x2808,0x2FF8, 0x6888,0xA8A8,0x2BF8,0x2AA8, 0x2AA8,0x2AA8,0x2AA8,0x2AA8, 0x2AEA,0x288A,0x3086,0x2080},
   {0x0000,0x0000,0x0000,0x0000, 0x0000,0x0000,0x0000,0x0000, 0x0000,0x0000,0x1800,0x1800, 0x1000,0x2000,0x0000,0x0000},
@@ -29,8 +20,9 @@ unsigned data_ascii[][display_array_size] = {
   {0x0020,0x00F0,0x1F00,0x1000, 0x1100,0x1100,0x2104,0x7FFE, 0x0100,0x0100,0x0920,0x0910, 0x1108,0x210C,0x4504,0x0200},//le
   {0x0000,0x0180,0x03C0,0x03C0, 0x03C0,0x0180,0x0180,0x0180, 0x0180,0x0180,0x0000,0x0000, 0x0180,0x0180,0x0000,0x0000}
 };
+int charCount=0;
 
-int music_rhythm[MUSIC_ELEMENT][2] = {
+int music_rhythm[][2] = {
   { 392,250  } ,
   { 392,250  } ,
   { 440,500  } ,
@@ -57,13 +49,7 @@ int music_rhythm[MUSIC_ELEMENT][2] = {
   { 587,500  } ,
   { 523,1000  }
 };
-
-//the pin to control ROW
-int pinRow[PIN_COUNT] = {
-  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
-};
-
-const int pinMusic = 18;
+int rhythmCount = 0;
 
 SimpleTimer timer;
 
@@ -85,30 +71,16 @@ void displayNum(unsigned rowNum)
 // function to be called repeatedly
 void POV() {
   static unsigned counter;
-  //unsigned charCounter;
-  //charCounter = counter>>3;
-  //displayNum(data_ascii[counter>>3][counter&7]);
-  //if(charCounter>1)counter=0;
-   Serial.println(counter);
-  //counter++;
-  int i = 0 ;
-  if(counter==0){
-    for(i=0;i<16;i++)
-    {
-      digitalWrite(pinRow[i], HIGH);
-    }
-    counter=1;
-  } else{
-    for(i=0;i<16;i++)
-    {
-      digitalWrite(pinRow[i], LOW);
-    }
-    counter = 0;
+  unsigned charCounter;
+  charCounter = counter >> 4;
+  displayNum(charList[charCounter][counter & 0xF]);
+  counter++;
+  if(charCounter >= charCount){
+    counter=0;
   }
 }
 
 void Music(){
-  //Serial.println("music");
   static int counter=0;
   static int rhythm=0;
   if(rhythm == 0){
@@ -119,19 +91,25 @@ void Music(){
   if(rhythm == 0){
     counter++;
   }
-  if(counter>=MUSIC_ELEMENT){
+  if(counter >= rhythmCount){
     counter=0;
   }
+  Serial.println(counter);
 }
 
 
 void setup() {
-    Serial.begin(9600);
+  Serial.begin(9600);
   //
   //  // welcome message
-  //  Serial.println("SimpleTimer Example");
-
   // timed actions setup
+  charCount = sizeof(charList) / sizeof(charList[0]);
+  rhythmCount = sizeof(music_rhythm) / sizeof(music_rhythm[0]);
+//  Serial.print("charCount:");
+//  Serial.println(charCount);
+//  Serial.print("rhythmCount:");
+//  Serial.println(rhythmCount);
+  
   timer.setInterval(10, POV);
   timer.setInterval(250, Music);
 
@@ -141,7 +119,6 @@ void setup() {
     pinMode(pinRow[i], OUTPUT);
     digitalWrite(pinRow[i], LOW);
   }
-
 }
 
 void loop() {
